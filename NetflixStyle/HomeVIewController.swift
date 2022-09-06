@@ -1,5 +1,6 @@
 
 import UIKit
+import SwiftUI
 
 class HomeViewController: UICollectionViewController{
     
@@ -38,6 +39,43 @@ class HomeViewController: UICollectionViewController{
               let data = FileManager.default.contents(atPath: path),
               let list = try? PropertyListDecoder().decode([Content].self, from: data) else { return []}
         return list
+    }
+    
+    
+    /// 각각의 섹션 타입에 대한 UICollectionViewLayout 생성
+    private func layout() -> UICollectionViewLayout {
+        return UICollectionViewCompositionalLayout{[weak self] sectionNumber, environment -> NSCollectionLayoutSection? in
+            guard let self = self else { return nil}
+            
+            switch self.contents[sectionNumber].sectionType{
+            case .basic:
+                return self.createBasicTypeSection()
+                
+            default:
+                return nil
+            }
+        }
+    }
+    
+    /// Total Section Setting
+    private func createBasicTypeSection() -> NSCollectionLayoutSection {
+        //Item
+        let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(0.3), heightDimension: .fractionalHeight(0.75))
+        
+        let item = NSCollectionLayoutItem(layoutSize: itemSize)
+        
+        item.contentInsets = .init(top: 10, leading: 5, bottom: 0, trailing: 5)
+        
+        //group
+        let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(0.9), heightDimension: .estimated(200))
+        let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitem: item, count: 3)
+        
+        //section
+        let section = NSCollectionLayoutSection(group: group)
+        section.orthogonalScrollingBehavior = .continuous
+        section.contentInsets = .init(top: 0, leading: 5, bottom: 0, trailing: 5)
+        return section
+        
     }
 }
 
@@ -88,5 +126,25 @@ extension HomeViewController{
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let sectionName = contents[indexPath.section].sectionName
         print("\(sectionName) 섹션의 \(indexPath.row+1)번쨰 콘텐츠")
+    }
+}
+
+//SwiftUI를 활용한 미리보기
+struct HomeViewController_Previews: PreviewProvider{
+    static var previews: some View {
+        Container().edgesIgnoringSafeArea(.all)
+    }
+    
+    struct Container: UIViewControllerRepresentable {
+        func makeUIViewController(context: Context) -> UIViewController {
+            let layout = UICollectionViewLayout()
+            let homeViewController = HomeViewController(collectionViewLayout: layout)
+            
+            return UINavigationController(rootViewController: homeViewController)
+        }
+    
+        func updateUIViewController(_ uiViewController: UIViewController, context: Context) {}
+        
+        typealias UIViewControllerType = UIViewController
     }
 }
