@@ -1,9 +1,4 @@
-//
-//  ViewController.swift
-//  NetflixStyle
-//
-//  Created by 김진혁 on 2022/09/06.
-//
+
 
 import UIKit
 
